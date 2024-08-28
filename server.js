@@ -1,6 +1,8 @@
 const express = require('express');
 const app = express();
-const port = 8080;
+
+// Use the PORT environment variable provided by Adaptable.io, or default to 8080 for local testing
+const port = process.env.PORT || 8080;
 
 let lastIdentifier = null;
 let taskerReady = false;
@@ -44,6 +46,7 @@ app.get('/check-script-status', (req, res) => {
     }
 });
 
+// Start the server and listen on the specified port
 app.listen(port, '0.0.0.0', () => {
-    console.log(`Server listening at http://localhost:${port}`);
+    console.log(`Server listening at http://0.0.0.0:${port}`);
 });
