@@ -7,13 +7,13 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "axios": "^1.7.5",
     "express": "^4.17.1",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "axios": "^0.21.1"
   },
   "engines": {
     "node": ">=14.0.0"
   },
-  "author": "Anas",
+  "author": "Amine",
   "license": "MIT"
 }
