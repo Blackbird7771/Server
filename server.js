@@ -1,48 +1,42 @@
 const express = require('express');
 const app = express();
 
-// Use the PORT environment variable provided by Adaptable.io, or default to 8080 for local testing
 const port = process.env.PORT || 8080;
 
-let lastIdentifier = null;
-let taskerReady = false;
+let serverStatus = 'Idle'; // Default status
 
-// Endpoint for script to notify Tasker with a unique identifier
+// Endpoint for Puppeteer to notify Tasker that it has finished a task
 app.get('/notify-tasker', (req, res) => {
     const identifier = req.query.id;
 
-    if (identifier && identifier !== lastIdentifier) {
-        lastIdentifier = identifier;  // Update the last processed identifier
-        taskerReady = false;  // Reset Tasker status
-        console.log('Script finished its task, notified Tasker with new identifier:', identifier);
-        res.send('Tasker will proceed with new task');
+    if (identifier) {
+        serverStatus = 'Waiting for Tasker';  // Update status to wait for Tasker
+        console.log('Script task completed, waiting for Tasker to proceed...');
+        res.send('Server status updated to: Waiting for Tasker');
     } else {
-        res.send('No new task for Tasker');
+        res.send('Invalid request');
     }
 });
 
-// Endpoint for Tasker to notify script after completing the task
-app.get('/tasker-response', (req, res) => {
-    taskerReady = true;
-    console.log('Tasker completed its task');
-    res.send('Script can proceed');
+// Endpoint for Tasker to check server status
+app.get('/check-server-status', (req, res) => {
+    res.send(serverStatus);
 });
 
-// Endpoint for Tasker to check if the script is done
+// Endpoint for Tasker to notify the server after completing its task
+app.get('/tasker-finished', (req, res) => {
+    serverStatus = 'Tasker Finished';  // Update status to indicate Tasker is done
+    console.log('Tasker has finished its task, script can now proceed...');
+    res.send('Server status updated to: Tasker Finished');
+});
+
+// Endpoint for Puppeteer to check if Tasker has finished
 app.get('/check-tasker-status', (req, res) => {
-    if (taskerReady) {
-        res.send('Tasker is ready');
+    if (serverStatus === 'Tasker Finished') {
+        serverStatus = 'Idle';  // Reset status for the next cycle
+        res.send('Tasker Finished');
     } else {
-        res.send('Tasker not ready');
-    }
-});
-
-// Endpoint for script to check if Tasker is done
-app.get('/check-script-status', (req, res) => {
-    if (taskerReady) {
-        res.send('Tasker is done');
-    } else {
-        res.send('Tasker still working');
+        res.send('Waiting for Tasker');
     }
 });
 
